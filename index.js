@@ -24,7 +24,32 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get("/api/:date?", function (req, res) {
+  let { date } = req.params;
 
+  // If no date is provided, return the current UTC timestamp
+  if (!date) {
+    let now = new Date();
+    return res.json({ unix: now.getTime(), utc: now.toUTCString() });
+  }
+
+  // If the date is a number (UNIX timestamp), parse it as an integer
+  if (/^\d+$/.test(date)) {
+    date = parseInt(date);
+  }
+
+  let parsedDate = new Date(date);
+
+  // Explicitly use UTC formatting
+  if (isNaN(parsedDate.getTime())) {
+    return res.json({ error: "Invalid Date" });
+  }
+
+  res.json({
+    unix: parsedDate.getTime(),
+    utc: parsedDate.toUTCString(), // Ensures UTC output
+  });
+});
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
