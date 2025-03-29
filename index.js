@@ -1,57 +1,58 @@
 // index.js
-// where your node app starts
+// Where your Node.js app starts
 
-// init project
-var express = require('express');
+// Init project
+var express = require("express");
+var cors = require("cors");
+
 var app = express();
 
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+// Enable CORS so that the API is remotely testable
+app.use(cors({ optionsSuccessStatus: 200 }));
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+// Serve static files
+app.use(express.static("public"));
 
-// http://expressjs.com/en/starter/basic-routing.html
+// Default route: Serve the index.html page
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+  res.sendFile(__dirname + "/views/index.html");
 });
 
-
-// your first API endpoint... 
+// Test API endpoint
 app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+  res.json({ greeting: "hello API" });
 });
 
+// Timestamp API endpoint
 app.get("/api/:date?", function (req, res) {
   let { date } = req.params;
 
-  // If no date is provided, return the current UTC timestamp
+  // If no date is provided, return the current timestamp
   if (!date) {
     let now = new Date();
     return res.json({ unix: now.getTime(), utc: now.toUTCString() });
   }
 
-  // If the date is a number (UNIX timestamp), parse it as an integer
+  // Handle UNIX timestamps correctly (must be treated as a number)
   if (/^\d+$/.test(date)) {
     date = parseInt(date);
   }
 
   let parsedDate = new Date(date);
 
-  // Explicitly use UTC formatting
+  // Check if the parsed date is valid
   if (isNaN(parsedDate.getTime())) {
     return res.json({ error: "Invalid Date" });
   }
 
+  // Return the correct timestamp response
   res.json({
     unix: parsedDate.getTime(),
-    utc: parsedDate.toUTCString(), // Ensures UTC output
+    utc: parsedDate.toUTCString(),
   });
 });
 
-// Listen on port set in environment variable or default to 3000
+// Start server
 var listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+  console.log("Your app is listening on port " + listener.address().port);
 });
